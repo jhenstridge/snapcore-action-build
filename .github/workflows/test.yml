@@ -27,10 +27,12 @@ jobs:
           - core24
     steps:
     - uses: actions/checkout@v4
-    - uses: ./
-      id: snapcraft
       with:
-        path: './test-projects/${{ matrix.project }}'
+        path: './action-build'
+    - run: |
+        cp -a action-build/test-projects/${{ matrix.project }}/* .
+    - uses: ./action-build
+      id: snapcraft
     - uses: actions/upload-artifact@v4
       with:
         name: 'snap-${{ matrix.project }}'
@@ -46,10 +48,13 @@ jobs:
           - core
     steps:
     - uses: actions/checkout@v4
-    - uses: ./
+      with:
+        path: './action-build'
+    - run: |
+        cp -a action-build/test-projects/${{ matrix.project }}/* .
+    - uses: ./action-build
       id: snapcraft
       with:
-        path: './test-projects/${{ matrix.project }}'
         snapcraft-channel: 4.x/stable
     - uses: actions/upload-artifact@v4
       with:
@@ -81,6 +86,8 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
     - uses: actions/checkout@v4
-    - uses: ./
       with:
-        path: './test-projects/core22'
+        path: './action-build'
+    - run: |
+        cp -a action-build/test-projects/core24/* .
+    - uses: ./action-build
