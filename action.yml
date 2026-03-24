@@ -45,6 +45,42 @@ inputs:
 outputs:
   snap:
     description: 'The file name of the resulting snap.'
+    value: ${{ steps.build-snap.outputs.snap-path }}
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: 'composite'
+  steps:
+    - name: suggest upgrading to canonical/actions/build-snap
+      shell: bash
+      run: |
+        echo '::warning::Please upgrade to the canonical/actions/build-snap action'
+    - name: path input is unsupported
+      if: inputs.path != '.'
+      shell: bash
+      run: |
+        echo '::error::The path input parameter is no longer supported'
+        exit 1
+    - name: snapcraft-args input is unsupported
+      if: inputs.snapcraft-args != ''
+      shell: bash
+      run: |
+        echo '::error::The snapcraft-args input parameter is no longer supported'
+        exit 1
+    - name: ua-token input is unsupported
+      if: inputs.ua-token != ''
+      shell: bash
+      run: |
+        echo '::error::The ua-token input parameter is no longer supported'
+        exit 1
+    - name: populate build-info
+      if: inputs.build-info == 'true'
+      shell: bash
+      run: |
+        echo "SNAPCRAFT_IMAGE_INFO={\"build_url\": \"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}" >> $GITHUB_ENV
+        echo "SNAPCRAFT_BUILD_INFO=1" >> $GITHUB_ENV
+    - name: build the snap
+      id: build-snap
+      uses: canonical/actions/build-snap@release
+      with:
+        snapcraft-channel: ${{ inputs.snapcraft-channel }}
+        review: false
+        publish: false
